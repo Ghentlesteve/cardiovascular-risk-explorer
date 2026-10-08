@@ -1,7 +1,7 @@
 # Cardiovascular Risk Explorer
 
-An interactive **Power BI** dashboard that explores how lifestyle and clinical factors
-(age, BMI, smoking, blood pressure, cholesterol) relate to heart attack, stroke and kidney disease.
+An interactive **Power BI** dashboard for exploring cardiovascular risk factors
+(age, BMI, smoking, blood pressure, cholesterol) alongside heart attack, stroke and kidney disease.
 
 Pick an organ (**Heart / Brain / Kidney**) and a status (**Healthy / At Risk**) and the whole
 report updates together: the organ image, the KPI cards and every chart.
@@ -13,6 +13,8 @@ report updates together: the organ image, the KPI cards and every chart.
 > modelled on the public health datasets commonly shared on [Kaggle](https://www.kaggle.com/datasets),
 > such as stroke-prediction and heart-attack / heart-disease datasets, with realistic relationships
 > built in (e.g. more years smoked and higher blood pressure raise the risk of heart attack and stroke).
+> Because those relationships were coded into the generator, the patterns in the charts show how the
+> dashboard works; they are not findings about real patients.
 > No real patient data is used, and the dashboard is a portfolio/learning project, not a clinical tool.
 
 ---
@@ -150,7 +152,6 @@ All measures are listed in [`powerbi/measures.dax`](powerbi/measures.dax).
 | Brain | `Stroke = 1` |
 | Kidney | `Kidney_Disease = 1` |
 
-Rates are set deliberately high (roughly 20-35%) so both states have plenty of patients to analyse.
 
 ---
 
