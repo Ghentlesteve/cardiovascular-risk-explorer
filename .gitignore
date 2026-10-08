@@ -1,0 +1,17 @@
+# Power BI temp / lock files
+~$*.pbix
+*.pbix.bak
+.pbi/
+# local preview images
+assets/organs/powerbi/_preview.jpg
+# Python
+__pycache__/
+*.pyc
+.venv/
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+# empty scratch files from screenshot conversion
+docs/dash_tmp.png
+docs/dashboard_full.png

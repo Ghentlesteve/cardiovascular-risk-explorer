@@ -1,0 +1,31 @@
+{
+  "name": "Cardio Clinical",
+  "dataColors": ["#2E86AB", "#12355B", "#E4572E", "#F2A541", "#1A936F", "#8E7DBE", "#5B6B82", "#A23B72"],
+  "background": "#FFFFFF",
+  "foreground": "#1B2A41",
+  "tableAccent": "#12355B",
+  "good": "#1A936F",
+  "neutral": "#F2A541",
+  "bad": "#C0392B",
+  "textClasses": {
+    "callout": { "fontSize": 28, "fontFace": "Segoe UI Semibold", "color": "#12355B" },
+    "title": { "fontSize": 12, "fontFace": "Segoe UI Semibold", "color": "#1B2A41" },
+    "header": { "fontSize": 12, "fontFace": "Segoe UI Semibold", "color": "#1B2A41" },
+    "label": { "fontSize": 10, "fontFace": "Segoe UI", "color": "#5B6B82" }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#E3E8EF" } }, "radius": 10 }],
+        "dropShadow": [{ "show": true }]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#EEF2F7" } }, "transparency": 0 }],
+        "outspace": [{ "color": { "solid": { "color": "#E4E9F0" } } }]
+      }
+    }
+  }
+}

@@ -1,0 +1,115 @@
+// =====================================================================
+// Cardiovascular Risk Explorer - DAX measures
+// Tables: patients (fact), dim_organ, dim_status  (dim tables are DISCONNECTED)
+// Create all measures in the `patients` table (or a dedicated _Measures table).
+// =====================================================================
+
+// ---------- Selector state ----------
+Selected Organ =
+    SELECTEDVALUE ( dim_organ[Organ], "Heart" )
+
+Selected Status =
+    SELECTEDVALUE ( dim_status[Status], "At Risk" )
+
+// 1 if a patient's chosen-organ status matches the toggle
+// (used as a visual-level filter, or inside CALCULATE below)
+Organ Status Match =
+    SWITCH (
+        [Selected Organ],
+        "Heart",  IF ( MAX ( patients[Heart_Status] )  = [Selected Status], 1, 0 ),
+        "Brain",  IF ( MAX ( patients[Brain_Status] )  = [Selected Status], 1, 0 ),
+        "Kidney", IF ( MAX ( patients[Kidney_Status] ) = [Selected Status], 1, 0 )
+    )
+
+// ---------- KPIs (respond to organ + status selection) ----------
+Total Patients =
+    CALCULATE (
+        COUNTROWS ( patients ),
+        FILTER ( patients, [Organ Status Match] = 1 )
+    )
+
+Avg Age =
+    CALCULATE ( AVERAGE ( patients[Age] ), FILTER ( patients, [Organ Status Match] = 1 ) )
+
+Avg BMI =
+    CALCULATE ( AVERAGE ( patients[BMI] ), FILTER ( patients, [Organ Status Match] = 1 ) )
+
+Avg Risk Score =
+    CALCULATE ( AVERAGE ( patients[Risk_Score] ), FILTER ( patients, [Organ Status Match] = 1 ) )
+
+// ---------- "vs overall average" cards ----------
+Overall Avg Age =
+    CALCULATE ( AVERAGE ( patients[Age] ), ALL ( patients ) )
+
+Overall Avg BMI =
+    CALCULATE ( AVERAGE ( patients[BMI] ), ALL ( patients ) )
+
+Age vs Avg = [Avg Age] - [Overall Avg Age]
+BMI vs Avg = [Avg BMI] - [Overall Avg BMI]
+
+Age vs Avg Label =
+    VAR d = [Age vs Avg]
+    RETURN IF ( d >= 0, "▲ ", "▼ " ) & FORMAT ( ABS ( d ), "0.0" )
+
+BMI vs Avg Label =
+    VAR d = [BMI vs Avg]
+    RETURN IF ( d >= 0, "▲ ", "▼ " ) & FORMAT ( ABS ( d ), "0.0" )
+
+// Colour for the arrows: red = worse than average, green = better
+Delta Colour Age = IF ( [Age vs Avg] >= 0, "#C0392B", "#2E9E4F" )
+Delta Colour BMI = IF ( [BMI vs Avg] >= 0, "#C0392B", "#2E9E4F" )
+
+// ---------- Chart measures ----------
+Patient Share % =
+    DIVIDE ( [Total Patients], CALCULATE ( COUNTROWS ( patients ), ALL ( patients ) ) )
+
+// Risk by age group (stacked bars: Low / Medium / High) - use Risk_Band in Legend
+Patients (Band) =
+    CALCULATE ( COUNTROWS ( patients ), FILTER ( patients, [Organ Status Match] = 1 ) )
+
+// Smoking duration & daily intake line chart: X = Smoking_Years_Band, Y = this
+Avg Cigarettes / Day =
+    CALCULATE (
+        AVERAGE ( patients[Cigarettes_Per_Day] ),
+        FILTER ( patients, [Organ Status Match] = 1 )
+    )
+
+Hypertension % =
+    CALCULATE (
+        DIVIDE (
+            COUNTROWS ( FILTER ( patients, patients[Hypertension] = "Yes" ) ),
+            COUNTROWS ( patients )
+        ),
+        FILTER ( patients, [Organ Status Match] = 1 )
+    )
+
+// ---------- Organ image swap ----------
+// Needs the `organ_images` table (see organ_images.pq). Returns a base64 data URI.
+// After creating it: Measure tools > Data category = Image URL.
+Organ Image =
+    VAR k = LOWER ( [Selected Organ] ) & "_" & IF ( [Selected Status] = "Healthy", "healthy", "damaged" )
+    RETURN
+        "data:image/png;base64,"
+            & CONCATENATEX (
+                FILTER ( ALL ( organ_images ), organ_images[Image] = k ),
+                organ_images[Part],
+                "",
+                organ_images[Idx], ASC
+            )
+
+// Dynamic title
+Dashboard Title =
+    "Cardiovascular Risk Analysis - " & [Selected Organ] & " (" & [Selected Status] & ")"
+
+
+// =====================================================================
+// Calculated COLUMNS (create in Table view on `patients` > New column)
+// Then: Age_Group > Sort by column > Age_Sort, Risk_Band > Sort by column > Risk_Band_Sort.
+// They are derived from Age / Risk_Score (not from the text column) to avoid a circular dependency.
+// =====================================================================
+Age_Sort =
+    SWITCH ( TRUE (), patients[Age] <= 29, 1, patients[Age] <= 39, 2, patients[Age] <= 49, 3,
+             patients[Age] <= 59, 4, patients[Age] <= 69, 5, 6 )
+
+Risk_Band_Sort =
+    IF ( patients[Risk_Score] <= 20, 1, IF ( patients[Risk_Score] <= 40, 2, 3 ) )
